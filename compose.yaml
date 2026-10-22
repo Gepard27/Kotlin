@@ -1,0 +1,40 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: campus_equipment
+      POSTGRES_USER: campus
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:?Generate .env with scripts/setup-env.ps1}
+    ports:
+      - "127.0.0.1:${DB_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U campus -d campus_equipment"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  server:
+    build:
+      context: ./server
+    environment:
+      DATABASE_URL: jdbc:postgresql://db:5432/campus_equipment
+      DATABASE_USER: campus
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD:?Generate .env first}
+      BOOTSTRAP_ADMIN_EMAIL: ${BOOTSTRAP_ADMIN_EMAIL:?Generate .env first}
+      BOOTSTRAP_ADMIN_NAME: ${BOOTSTRAP_ADMIN_NAME:-Administrator}
+      BOOTSTRAP_ADMIN_KEY: ${BOOTSTRAP_ADMIN_KEY:?Generate .env first}
+      HTTP_PORT: "8080"
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    ports:
+      - "127.0.0.1:${HTTP_PORT:-8080}:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    stop_grace_period: 15s
+
+volumes:
+  postgres_data:
