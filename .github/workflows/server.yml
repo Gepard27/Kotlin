@@ -1,0 +1,46 @@
+name: Server verification
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+      - name: Build and test with real PostgreSQL
+        working-directory: server
+        run: sh ./gradlew --no-daemon build
+      - name: Generate isolated demo credentials
+        shell: pwsh
+        run: ./scripts/setup-env.ps1
+      - name: Validate Compose and start containers
+        run: |
+          docker compose config --quiet
+          docker compose up --build -d --wait --wait-timeout 120
+      - name: Verify booking lifecycle over HTTP
+        shell: pwsh
+        run: ./scripts/smoke.ps1
+      - name: Server logs on failure
+        if: failure()
+        run: docker compose logs server db
+      - name: Stop CI containers
+        if: always()
+        run: docker compose down
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: |
+            server/build/reports/tests/
+            server/common/build/reports/tests/

@@ -1,0 +1,23 @@
+[versions]
+kotlin = "2.3.20"
+postgres = "42.7.14"
+flyway = "11.20.3"
+jackson = "2.22.4"
+hikari = "6.3.0"
+slf4j = "2.0.17"
+embedded-postgres = "2.2.2"
+postgres-binaries = "16.15.0"
+
+[libraries]
+kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
+postgres = { module = "org.postgresql:postgresql", version.ref = "postgres" }
+flyway-core = { module = "org.flywaydb:flyway-core", version.ref = "flyway" }
+flyway-postgres = { module = "org.flywaydb:flyway-database-postgresql", version.ref = "flyway" }
+jackson = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
+hikari = { module = "com.zaxxer:HikariCP", version.ref = "hikari" }
+slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
+slf4j-simple = { module = "org.slf4j:slf4j-simple", version.ref = "slf4j" }
+embedded-postgres = { module = "io.zonky.test:embedded-postgres", version.ref = "embedded-postgres" }
+
+[plugins]
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
